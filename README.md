@@ -24,4 +24,6 @@ Commands (in a vehicle as driver)
 
 /veh dance: Enables/disables  Dance for your current vehicle.
 
+-------------------------------------------------------------------------------------------------------------------
+
 Video https://streamable.com/98p4d5
