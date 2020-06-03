@@ -1,6 +1,8 @@
 # AutoPilotFiveM
 Added AutoPilot System For Vehicle (Works With Car Bike &amp; Helicopter)
 
+Video https://streamable.com/98p4d5
+
 -------------------------------------------------------------------------------------------------------------------
 
 Commands (in a vehicle as driver)
@@ -26,4 +28,14 @@ Commands (in a vehicle as driver)
 
 -------------------------------------------------------------------------------------------------------------------
 
-Video https://streamable.com/98p4d5
+# Legal
+### License
+Script For ESX
+
+Copyright (C) 2015-2020 Dev Adnani
+
+This program Is free software: you can redistribute it And/Or modify it under the terms Of the GNU General Public License As published by the Free Software Foundation, either version 3 Of the License, Or (at your option) any later version.
+
+This program Is distributed In the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty Of MERCHANTABILITY Or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License For more details.
+
+You should have received a copy Of the GNU General Public License along with this program. If Not, see http://www.gnu.org/licenses/.
