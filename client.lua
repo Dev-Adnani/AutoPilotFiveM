@@ -1,3 +1,7 @@
+--- START OF CONFIGURATION
+local vehicles = "some,example,vehicle,models" -- define what cars can be used as a veh (by modelname), set to "" (empty) for all cars
+--- END OF CONFIGURATION
+
 local veh = nil
 local tesla_blip = nil
 local tesla_pilot = false
@@ -12,14 +16,12 @@ local crash_ped_fr = nil
 local crash_ped_rl = nil
 local crash_ped_rr = nil
 
-
-
-TriggerEvent('chat:addSuggestion', '/veh', 'car features', {{name="pilot|crash|dance|mark", help="Enable autopilot, crash-avoidance,  Dance or mark your current vehicle "}})
+--TriggerEvent('chat:addSuggestion', '/veh', 'car features', {{name="pilot|crash|dance", help="Enable autopilot, crash-avoidance."}})
 RegisterCommand("veh", function(source, args)
 	if(args[1] == "mark") then
-		if(IsPedInAnyVehicle(GetPlayerPed(-1)) and GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1), false), -1) == GetPlayerPed(-1)) then
+		if(IsPedInAnyVehicle(GetPlayerPed(-1)) and GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1), false), -1) == GetPlayerPed(-1) and (vehicles:find(GetDisplayNameFromVehicleModel(GetEntityModel(GetVehiclePedIsIn(GetPlayerPed(-1), false)))) or vehicles == "")) then
 			veh = GetVehiclePedIsIn(GetPlayerPed(-1), false)
-			minimap("This vehicle is now marked as your Vehicle.\nIt can be controlled when you are not sitting in it.")
+			minimap("This vehicle is now marked .\nIt can be controlled when you are not sitting in it.")
 			if(DoesBlipExist(tesla_blip)) then
 				RemoveBlip(tesla_blip)
 			end
@@ -27,21 +29,20 @@ RegisterCommand("veh", function(source, args)
 			SetBlipSprite(tesla_blip, 595)
 			SetBlipColour(tesla_blip, 26)
 			BeginTextCommandSetBlipName("STRING")
-      AddTextComponentString("Vehicle")
+      AddTextComponentString("Car")
 			EndTextCommandSetBlipName(tesla_blip)
 		else
 			veh = nil
-			minimap("Your Vehicle has been unmarked.")
+			minimap("Your Car has been unmarked.")
 			if(DoesBlipExist(tesla_blip)) then
 				RemoveBlip(tesla_blip)
 			end
 			tesla_blip = nil
 		end
 	else
-		if(IsPedInAnyVehicle(GetPlayerPed(-1), false) and GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1), false), -1) == GetPlayerPed(-1)) then
+		if(IsPedInAnyVehicle(GetPlayerPed(-1), false) and GetPedInVehicleSeat(GetVehiclePedIsIn(GetPlayerPed(-1), false), -1) == GetPlayerPed(-1) and (vehicles:find(GetDisplayNameFromVehicleModel(GetEntityModel(GetVehiclePedIsIn(GetPlayerPed(-1), false)))) or vehicles == "")) then
 			if(args[1] == "pilot") then
 				waypoint = Citizen.InvokeNative(0xFA7C7F0AADF25D09, GetFirstBlipInfoId(8), Citizen.ResultAsVector())
-				print(waypoint)
 				if(IsWaypointActive()) then
 					if(pilot) then
 						pilot = false
@@ -71,6 +72,11 @@ RegisterCommand("veh", function(source, args)
 										SetVehicleForwardSpeed(GetVehiclePedIsIn(GetPlayerPed(-1), 0), GetEntitySpeed(GetVehiclePedIsIn(GetPlayerPed(-1), 0)) - 1.0)
 										Wait(100)
 									end
+									pilot = false
+									ClearPedTasks(GetPlayerPed(-1))
+									minimap("Auto-Pilot deactivated.")
+								end
+								if(IsControlPressed(27, 63) or IsControlPressed(27, 64) or IsControlPressed(27, 71) or IsControlPressed(27, 72) or IsControlPressed(27, 76)) then
 									pilot = false
 									ClearPedTasks(GetPlayerPed(-1))
 									minimap("Auto-Pilot deactivated.")
@@ -314,77 +320,3 @@ function minimap(text)
 	AddTextComponentString(text)
 	DrawNotification(0,1)
 end
-
-function translatespeed(float)
-local speed = float + 11
-return speed
-end
-
-autopilotenabled = false
-Citizen.CreateThread(function()
-    while true do
-			local waypointBlip = GetFirstBlipInfoId(8) -- 8 = Waypoint ID
-			local x,y,z = table.unpack(Citizen.InvokeNative(0xFA7C7F0AADF25D09, waypointBlip, Citizen.ResultAsVector()))
-			local px,py,pz = table.unpack(GetEntityCoords(PlayerPedId()))
-			local distbetween = Vdist(x,y,z,px,py,pz)
-			if IsControlPressed(1,36) then
-				if IsControlJustPressed(1,21) then
-					if GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -1894894188 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -429774847 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -1622444098 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == 884483972 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == 569305213 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -1285460620 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -1529242755 or GetEntityModel(GetVehiclePedIsUsing(PlayerPedId())) == -429774847 then
-							autopilotenabled = not autopilotenabled
-							if autopilotenabled then
-								SetNotificationTextEntry("STRING")
-								AddTextComponentString("~y~Autopilot ~g~Engaged")
-								DrawNotification(false, true)
-								if(not IsWaypointActive())then
-									SetNotificationTextEntry("STRING")
-									AddTextComponentString("~r~ERROR:~w~ No Destination Set.")
-									DrawNotification(true, true)
-									autopilotenabled = false
-									SetNotificationTextEntry("STRING")
-									AddTextComponentString("~y~Autopilot ~r~Deactivated")
-									DrawNotification(true, true)
-									TaskPause(PlayerPedId(), 10)
-								else
-									defaultspeed = 20.0  --1 = 3 MPH 5 = 11 MPH
-									TaskVehicleDriveToCoordLongrange(PlayerPedId(),GetVehiclePedIsUsing(PlayerPedId()), x,y,z, defaultspeed, 262579, 1.0) --262579
-								end
-							else
-								SetNotificationTextEntry("STRING")
-								AddTextComponentString("~y~Autopilot ~r~Deactivated")
-								DrawNotification(false, true)
-								TaskPause(PlayerPedId(), 10)
-							end
-					else
-						SetNotificationTextEntry("STRING")
-						AddTextComponentString("This Vehicle is not equipped with ~y~Autopilot~w~!")
-						DrawNotification(false, true)
-					end
-				end			
-			end
-			
-			if autopilotenabled then
-				if IsControlJustPressed(0, 71) and GetLastInputMethod( 0 ) then
-										defaultspeed = defaultspeed + 1.0
-										TaskVehicleDriveToCoordLongrange(PlayerPedId(),GetVehiclePedIsUsing(PlayerPedId()), x,y,z, defaultspeed, 262579, 1.0)
-				end
-				if IsControlJustPressed(0,72) and GetLastInputMethod( 0 ) then
-										defaultspeed = defaultspeed - 1.0
-										TaskVehicleDriveToCoordLongrange(PlayerPedId(),GetVehiclePedIsUsing(PlayerPedId()), x,y,z, defaultspeed, 262579, 1.0)
-				end				
-				if IsControlJustPressed(0,76) and GetLastInputMethod( 0 ) then
-										defaultspeed = 0.0
-										TaskVehicleDriveToCoordLongrange(PlayerPedId(),GetVehiclePedIsUsing(PlayerPedId()), x,y,z, defaultspeed, 262579, 1.0)
-										SetNotificationTextEntry("STRING")
-										AddTextComponentString("~y~[Autopilot]~r~ Emergency Stop Engaged")
-										DrawNotification(true, true)
-										SetNotificationTextEntry("STRING")
-										AddTextComponentString("~y~Autopilot ~r~Deactivated")
-										DrawNotification(false, true)
-										TaskPause(PlayerPedId(), 10)
-										autopilotenabled = false
-										
-				end
-			end
-        Citizen.Wait(0)
-    end
-end)
